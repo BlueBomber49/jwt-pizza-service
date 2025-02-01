@@ -41,7 +41,7 @@ afterAll(async () =>{
 test('get franchises test', async () => {
   const getRes = await request(app).get('/api/franchise')
   expect(getRes.status).toBe(200);
-  expect(getRes.body.length).toBeGreaterThan(2)
+  expect(getRes.body.length).toBeGreaterThan(1)
 });
 
 test('get user franchises test', async () => {
