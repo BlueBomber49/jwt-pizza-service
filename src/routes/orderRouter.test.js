@@ -8,6 +8,7 @@ let authHeader;
 let randName;
 let franchiseId;
 let storeId;
+let bobAuthHeader;
 
 function randomName(){
     return Math.random().toString(36).substring(2, 12);
@@ -24,6 +25,7 @@ beforeAll(async () => {
     await DB.addUser(testAdminUser)
     await DB.addUser(testUser)
     AdminAuth = await loginUser(testAdminUser)
+    bobAuthHeader = 'Bearer ' + await loginUser(testUser)
     authHeader = 'Bearer ' + AdminAuth
     const createRes = await request(app).post('/api/franchise').set('Authorization', authHeader).send({"name": randName, "admins": [{"email": testAdminUser.email}]})
     franchiseId = createRes.body.id
@@ -43,6 +45,14 @@ test('add to menu test', async () => {
     const putRes = await request(app).put('/api/order/menu').set('Authorization', authHeader).send(pizzaObject)
     expect(prevLength).toBeLessThan(putRes.body.length)
 })
+
+test('unauthorized add to menu test', async () => {
+    await request(app).get('/api/order/menu')
+    let pizzaObject = { "title": randName, "description": "testPizza", "image":"pizza9.png", "price": 0.0001 }
+    const putRes = await request(app).put('/api/order/menu').set('Authorization', bobAuthHeader).send(pizzaObject)
+    expect(putRes.status).toBe(403)
+})
+
 
 test('get orders test', async () => {
     const getRes = await request(app).get('/api/order').set('Authorization', authHeader)
