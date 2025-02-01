@@ -3,7 +3,6 @@ const app = require('../service');
 const { Role, DB } = require('../database/database.js');
 const testAdminUser = { name: 'pizza diner', email: 'reg@test.com', password: 'testpassword' , roles: [{role: Role.Admin}]};
 const testUser = {name: 'Bob', email: 'reg@test.com', password: 'testpassword', roles: [{role: Role.Diner}]};
-let AdminAuth;
 let authHeader;
 let randName;
 let franchiseId;
@@ -24,8 +23,8 @@ beforeAll(async () => {
     testAdminUser.email = randName + '@test.com';
     await DB.addUser(testAdminUser)
     await DB.addUser(testUser)
-    AdminAuth = await loginUser(testAdminUser)
-    bobAuth = await loginUser(testUser)
+    let AdminAuth = await loginUser(testAdminUser)
+    let bobAuth = await loginUser(testUser)
     bobAuthHeader = 'Bearer ' + bobAuth
     authHeader = 'Bearer ' + AdminAuth
     const createRes = await request(app).post('/api/franchise').set('Authorization', authHeader).send({"name": randName, "admins": [{"email": testAdminUser.email}]})
