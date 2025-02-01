@@ -25,7 +25,8 @@ beforeAll(async () => {
     await DB.addUser(testAdminUser)
     await DB.addUser(testUser)
     AdminAuth = await loginUser(testAdminUser)
-    bobAuthHeader = 'Bearer ' + await loginUser(testUser)
+    bobAuth = await loginUser(testUser)
+    bobAuthHeader = 'Bearer ' + bobAuth
     authHeader = 'Bearer ' + AdminAuth
     const createRes = await request(app).post('/api/franchise').set('Authorization', authHeader).send({"name": randName, "admins": [{"email": testAdminUser.email}]})
     franchiseId = createRes.body.id
