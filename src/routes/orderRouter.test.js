@@ -47,7 +47,6 @@ test('add to menu test', async () => {
 })
 
 test('unauthorized add to menu test', async () => {
-    await request(app).get('/api/order/menu')
     let pizzaObject = { "title": randName, "description": "testPizza", "image":"pizza9.png", "price": 0.0001 }
     const putRes = await request(app).put('/api/order/menu').set('Authorization', bobAuthHeader).send(pizzaObject)
     expect(putRes.status).toBe(403)
