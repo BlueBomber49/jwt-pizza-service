@@ -34,9 +34,11 @@ beforeAll(async () => {
   expect(createRes.status).toBe(200)
 });
 
+/*
 afterAll(async () =>{
     await request(app).delete(`/api/franchise/${franchiseId}`).set('Authorization', authHeader)
 })
+    */
 
 test('get franchises test', async () => {
   const getRes = await request(app).get('/api/franchise')
