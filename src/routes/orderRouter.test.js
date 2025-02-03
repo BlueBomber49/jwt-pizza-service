@@ -15,12 +15,14 @@ function randomName(){
 
 async function loginUser(userData){
     let loginRes = await request(app).put('/api/auth').send(userData)
+    expect(loginRes.status).toBe(200)
     return loginRes.body.token
 }
 
 beforeAll(async () => {
     randName = randomName()
     testAdminUser.email = randName + '@test.com';
+    testUser.email = randName + 'b@test.com'
     await DB.addUser(testAdminUser)
     await DB.addUser(testUser)
     let AdminAuth = await loginUser(testAdminUser)
