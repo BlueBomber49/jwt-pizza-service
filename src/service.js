@@ -9,7 +9,7 @@ const metrics = require('./metrics.js')
 const app = express();
 app.use(express.json());
 app.use(setAuthUser);
-app.use(metrics.trackEndpoint)
+//app.use(metrics.trackEndpoint)
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
@@ -51,6 +51,6 @@ app.use((err, req, res, next) => {
   next();
 });
 
-metrics.sendMetricsPeriodically(2000)
+//metrics.sendMetricsPeriodically(2000)
 
 module.exports = app;

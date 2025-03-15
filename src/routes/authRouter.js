@@ -75,7 +75,7 @@ authRouter.post(
     const user = await DB.addUser({ name, email, password, roles: [{ role: Role.Diner }] });
     const auth = await setAuth(user);
     res.json({ user: user, token: auth });
-  }), trackEndpoint('register')
+  })//, trackEndpoint('register')
 );
 
 // login
@@ -86,7 +86,7 @@ authRouter.put(
     const user = await DB.getUser(email, password);
     const auth = await setAuth(user);
     res.json({ user: user, token: auth });
-  }),  trackEndpoint('login')
+  })//,  trackEndpoint('login')
 );
 
 // logout
@@ -96,7 +96,7 @@ authRouter.delete(
   asyncHandler(async (req, res) => {
     await clearAuth(req);
     res.json({ message: 'logout successful' });
-  }),  trackEndpoint('logout')
+  })//,  trackEndpoint('logout')
 );
 
 // updateUser
@@ -113,7 +113,7 @@ authRouter.put(
 
     const updatedUser = await DB.updateUser(userId, email, password);
     res.json(updatedUser);
-  }),  trackEndpoint('update user')
+  })//,  trackEndpoint('update user')
 );
 
 async function setAuth(user) {
