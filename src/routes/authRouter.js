@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config.js');
 const { asyncHandler } = require('../endpointHelper.js');
 const { DB, Role } = require('../database/database.js');
+const { trackEndpoint } = require('../metrics.js')
 
 const authRouter = express.Router();
 
@@ -74,7 +75,7 @@ authRouter.post(
     const user = await DB.addUser({ name, email, password, roles: [{ role: Role.Diner }] });
     const auth = await setAuth(user);
     res.json({ user: user, token: auth });
-  })
+  }), trackEndpoint('register')
 );
 
 // login
@@ -85,7 +86,7 @@ authRouter.put(
     const user = await DB.getUser(email, password);
     const auth = await setAuth(user);
     res.json({ user: user, token: auth });
-  })
+  }),  trackEndpoint('login')
 );
 
 // logout
@@ -95,7 +96,7 @@ authRouter.delete(
   asyncHandler(async (req, res) => {
     await clearAuth(req);
     res.json({ message: 'logout successful' });
-  })
+  }),  trackEndpoint('logout')
 );
 
 // updateUser
@@ -112,7 +113,7 @@ authRouter.put(
 
     const updatedUser = await DB.updateUser(userId, email, password);
     res.json(updatedUser);
-  })
+  }),  trackEndpoint('update user')
 );
 
 async function setAuth(user) {
