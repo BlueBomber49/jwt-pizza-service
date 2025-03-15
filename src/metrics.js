@@ -6,7 +6,7 @@ const os = require("os");
 
 function getCpuUsagePercentage() {
   const cpuUsage = os.loadavg()[0] / os.cpus().length;
-  return cpuUsage.toFixed(2) * 100;
+  return parseInt(cpuUsage.toFixed(2) * 100);
 }
 
 function getMemoryUsagePercentage() {
@@ -14,29 +14,77 @@ function getMemoryUsagePercentage() {
   const freeMemory = os.freemem();
   const usedMemory = totalMemory - freeMemory;
   const memoryUsage = (usedMemory / totalMemory) * 100;
-  return memoryUsage.toFixed(0);
+  return parseInt(memoryUsage);
 }
 
-function trackEndpoint(endpoint) {
-  return (req, res, next) => {
-    requests[endpoint] = (requests[endpoint] || 0) + 1;
-    next();
-  };
-}
+class Metrics {
+  constructor(){
+    this.getRequests = 0
+    this.putRequests = 0
+    this.postRequests = 0
+    this.deleteRequests = 0
+    this.activeUsers = 0  //?
+    this.failedAuthAttempts = 0
+    this.successfulAuthAttempts = 0
+    this.cpuValue = 0
+    this.memoryValue = 0
+    this.pizzasSold = 0
+    this.pizzaCreationFailures = 0
+    this.revenueEarned = 0
+    this.endpointLatency = 0  //?
+    this.pizzaCreationLatency = 0  //?
+  }
 
-function sendMetricsPeriodically(period) {
-  setInterval(() => {
-    const cpuValue = getCpuUsagePercentage();
-    sendMetricToGrafana("cpu", cpuValue, "gauge", "%");
+  sendMetricsPeriodically(period) {
+    setInterval(() => {
+      this.getCpu()
+      sendMetricToGrafana("cpu", this.cpuValue, "gauge", "%");
+  
+      this.getMemory()
+      sendMetricToGrafana("memory", this.memoryValue, "gauge", "%");
+  
+    }, period).unref();
+  }
 
-    const memoryValue = getMemoryUsagePercentage();
-    sendMetricToGrafana("memory", memoryValue, "gauge", "%");
+  incrementGetRequests(){
+    this.getRequests += 1
+  }
 
-    Object.keys(requests).forEach((endpoint) => {
-        sendMetricToGrafana('requests', requests[endpoint], { endpoint }, "1");
-      });
+  incrementPutRequests(){
+    this.putRequests += 1
+  }
 
-  }, period);
+  incrementPostRequests(){
+    this.postRequests += 1
+  }
+
+  incrementDeleteRequests(){
+    this.deleteRequests += 1
+  }
+
+  incrementSuccessfulAuthAttempts(){
+    this.successfulAuthAttempts +=1
+  }
+
+  incrementFailedAuthAttempts(){
+    this.failedAuthAttempts +=1
+  }
+
+  getCpu(){
+    this.cpuValue = getCpuUsagePercentage()
+  }
+
+  getMemory(){
+    this.memoryValue = getMemoryUsagePercentage()
+  }
+
+  incrementPizzasSold(){
+    this.pizzasSold +=1
+  }
+
+  addRevenue(value){
+    this.trackRevenue += value
+  }
 }
 
 function sendMetricToGrafana(metricName, metricValue, type, unit) {
@@ -45,19 +93,19 @@ function sendMetricToGrafana(metricName, metricValue, type, unit) {
       {
         scopeMetrics: [
           {
-            metrics: [
+            metrics: [              
               {
-                name: metricName,
-                unit: unit,
-                [type]: {
-                  dataPoints: [
-                    {
-                      asInt: metricValue,
-                      timeUnixNano: Date.now() * 1000000,
-                    },
-                  ],
-                },
+              name: metricName,
+              unit: unit,
+              [type]: {
+                dataPoints: [
+                  {
+                    asInt: metricValue,
+                    timeUnixNano: Date.now() * 1000000,
+                  },
+                ],
               },
+            },
             ],
           },
         ],
@@ -101,6 +149,6 @@ function sendMetricToGrafana(metricName, metricValue, type, unit) {
     });
 }
 
-module.exports = {trackEndpoint, sendMetricsPeriodically}
+module.exports = new Metrics()
 
 //sendMetricsPeriodically(1000)
