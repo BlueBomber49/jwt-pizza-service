@@ -1,6 +1,5 @@
 const config = require("./config");
 
-let latency = 0;
 let requests = {}
 
 const os = require("os");
