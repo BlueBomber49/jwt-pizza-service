@@ -46,6 +46,8 @@ class Metrics {
       this.sendHTTPMetricsToGrafana()
 
       this.sendAuthMetricsToGrafana()
+
+      sendMetricToGrafana("active users", this.activeUsers, "gauge", "1")
   
     }, period).unref();
   }
@@ -90,6 +92,14 @@ class Metrics {
 
   incrementFailedAuthAttempts(){
     this.failedAuthAttempts +=1
+  }
+
+  incrementActiveUsers(){
+    this.activeUsers +=1
+  }
+
+  decrementActiveUsers(){
+    this.activeUsers -= 1
   }
 
   getCpu(){

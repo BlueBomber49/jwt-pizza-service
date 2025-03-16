@@ -75,6 +75,7 @@ authRouter.post(
     }
     const user = await DB.addUser({ name, email, password, roles: [{ role: Role.Diner }] });
     const auth = await setAuth(user);
+    Metrics.incrementActiveUsers()
     res.json({ user: user, token: auth });
   })
 );
@@ -89,6 +90,7 @@ authRouter.put(
     const auth = await setAuth(user);
     if(auth){
       Metrics.incrementSuccessfulAuthAttempts()
+      Metrics.incrementActiveUsers()
     }
     else{
       Metrics.incrementFailedAuthAttempts()
@@ -104,6 +106,7 @@ authRouter.delete(
   asyncHandler(async (req, res) => {
     Metrics.incrementDeleteRequests()
     await clearAuth(req);
+    Metrics.decrementActiveUsers()
     res.json({ message: 'logout successful' });
   })
 );
