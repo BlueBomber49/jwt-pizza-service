@@ -64,9 +64,9 @@ class Metrics {
   }
 
   sendAuthMetricsToGrafana(){
-    this.sendMetricToGrafana("successful logins", this.successfulAuthAttempts, "sum", "1")
+    sendMetricToGrafana("successful logins", this.successfulAuthAttempts, "sum", "1")
     this.successfulAuthAttempts = 0
-    this.sendMetricToGrafana("unsuccessful logins", this.failedAuthAttempts, "sum", "1")
+    sendMetricToGrafana("unsuccessful logins", this.failedAuthAttempts, "sum", "1")
     this.failedAuthAttempts = 0
   }
 
