@@ -71,10 +71,12 @@ authRouter.post(
     Metrics.incrementPostRequests()
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
+      Metrics.incrementFailedAuthAttempts()
       return res.status(400).json({ message: 'name, email, and password are required' });
     }
     const user = await DB.addUser({ name, email, password, roles: [{ role: Role.Diner }] });
     const auth = await setAuth(user);
+    Metrics.incrementSuccessfulAuthAttempts()
     Metrics.incrementActiveUsers()
     res.json({ user: user, token: auth });
   })
@@ -86,16 +88,17 @@ authRouter.put(
   asyncHandler(async (req, res) => {
     Metrics.incrementPutRequests()
     const { email, password } = req.body;
+    try {
     const user = await DB.getUser(email, password);
     const auth = await setAuth(user);
-    if(auth){
-      Metrics.incrementSuccessfulAuthAttempts()
-      Metrics.incrementActiveUsers()
-    }
-    else{
-      Metrics.incrementFailedAuthAttempts()
-    }
+    Metrics.incrementSuccessfulAuthAttempts()
+    Metrics.incrementActiveUsers()
     res.json({ user: user, token: auth });
+    }
+    catch(error){
+      Metrics.incrementFailedAuthAttempts()
+      throw error
+    }
   })
 );
 
@@ -123,7 +126,6 @@ authRouter.put(
     if (user.id !== userId && !user.isRole(Role.Admin)) {
       return res.status(403).json({ message: 'unauthorized' });
     }
-
     const updatedUser = await DB.updateUser(userId, email, password);
     res.json(updatedUser);
   })

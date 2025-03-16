@@ -25,7 +25,7 @@ class Metrics {
     this.deleteRequests = 0
     this.cpuValue = 0
     this.memoryValue = 0
-    this.activeUsers = 0  //?
+    this.activeUsers = 0
     this.failedAuthAttempts = 0
     this.successfulAuthAttempts = 0
     this.pizzasSold = 0
