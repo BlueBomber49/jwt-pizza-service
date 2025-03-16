@@ -34,7 +34,7 @@ while true; do
 done &
 pid2=$!
 
-# Simulate a franchisee logging in every two minutes
+# Simulate a franchisee logging in every 2 minutes
 while true; do
   response=$(curl -s -X PUT $host/api/auth -d '{"email":"f@jwt.com", "password":"franchisee"}' -H 'Content-Type: application/json')
   token=$(echo $response | jq -r '.token')
@@ -46,7 +46,7 @@ while true; do
 done &
 pid3=$!
 
-# Simulate a diner ordering a pizza every 20 seconds
+# Simulate a diner ordering a pizza every 50 seconds
 while true; do
   response=$(curl -s -X PUT $host/api/auth -d '{"email":"d@jwt.com", "password":"diner"}' -H 'Content-Type: application/json')
   token=$(echo $response | jq -r '.token')

@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config.js');
 const { asyncHandler } = require('../endpointHelper.js');
 const { DB, Role } = require('../database/database.js');
-//const { trackEndpoint } = require('../metrics.js')
+let Metrics = require('../metrics.js')
 
 const authRouter = express.Router();
 
@@ -68,7 +68,7 @@ authRouter.authenticateToken = (req, res, next) => {
 authRouter.post(
   '/',
   asyncHandler(async (req, res) => {
-    
+    Metrics.incrementPostRequests()
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'name, email, and password are required' });
@@ -76,18 +76,25 @@ authRouter.post(
     const user = await DB.addUser({ name, email, password, roles: [{ role: Role.Diner }] });
     const auth = await setAuth(user);
     res.json({ user: user, token: auth });
-  })//, trackEndpoint('register')
+  })
 );
 
 // login
 authRouter.put(
   '/',
   asyncHandler(async (req, res) => {
+    Metrics.incrementPutRequests()
     const { email, password } = req.body;
     const user = await DB.getUser(email, password);
     const auth = await setAuth(user);
+    if(auth){
+      Metrics.incrementSuccessfulAuthAttempts()
+    }
+    else{
+      Metrics.incrementFailedAuthAttempts()
+    }
     res.json({ user: user, token: auth });
-  })//,  trackEndpoint('login')
+  })
 );
 
 // logout
@@ -95,9 +102,10 @@ authRouter.delete(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
+    Metrics.incrementDeleteRequests()
     await clearAuth(req);
     res.json({ message: 'logout successful' });
-  })//,  trackEndpoint('logout')
+  })
 );
 
 // updateUser
@@ -105,6 +113,7 @@ authRouter.put(
   '/:userId',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
+    Metrics.incrementPutRequests()
     const { email, password } = req.body;
     const userId = Number(req.params.userId);
     const user = req.user;
@@ -114,7 +123,7 @@ authRouter.put(
 
     const updatedUser = await DB.updateUser(userId, email, password);
     res.json(updatedUser);
-  })//,  trackEndpoint('update user')
+  })
 );
 
 async function setAuth(user) {

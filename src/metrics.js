@@ -23,11 +23,11 @@ class Metrics {
     this.putRequests = 0
     this.postRequests = 0
     this.deleteRequests = 0
+    this.cpuValue = 0
+    this.memoryValue = 0
     this.activeUsers = 0  //?
     this.failedAuthAttempts = 0
     this.successfulAuthAttempts = 0
-    this.cpuValue = 0
-    this.memoryValue = 0
     this.pizzasSold = 0
     this.pizzaCreationFailures = 0
     this.revenueEarned = 0
@@ -42,8 +42,30 @@ class Metrics {
   
       this.getMemory()
       sendMetricToGrafana("memory", this.memoryValue, "gauge", "%");
+
+      this.sendHTTPMetricsToGrafana()
+
+      this.sendAuthMetricsToGrafana()
   
     }, period).unref();
+  }
+
+  sendHTTPMetricsToGrafana(){
+    sendMetricToGrafana("get requests", this.getRequests, "sum", "1")
+    this.getRequests = 0
+    sendMetricToGrafana("put requests", this.putRequests, "sum", "1")
+    this.putRequests = 0
+    sendMetricToGrafana("post requests", this.postRequests, "sum", "1")
+    this.postRequests = 0
+    sendMetricToGrafana("delete requests", this.deleteRequests, "sum", "1")
+    this.deleteRequests = 0
+  }
+
+  sendAuthMetricsToGrafana(){
+    this.sendMetricToGrafana("successful logins", this.successfulAuthAttempts, "sum", "1")
+    this.successfulAuthAttempts = 0
+    this.sendMetricToGrafana("unsuccessful logins", this.failedAuthAttempts, "sum", "1")
+    this.failedAuthAttempts = 0
   }
 
   incrementGetRequests(){
@@ -141,7 +163,7 @@ function sendMetricToGrafana(metricName, metricValue, type, unit) {
           );
         });
       } else {
-        console.log(`Pushed ${metricName}`);
+        //console.log(`Pushed ${metricName}`);
       }
     })
     .catch((error) => {
