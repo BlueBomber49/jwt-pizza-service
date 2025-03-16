@@ -91,8 +91,11 @@ orderRouter.post(
     });
     const j = await r.json();
     if (r.ok) {
+      Metrics.incrementPizzasSold()
+      Metrics.addRevenue(r.price)
       res.send({ order, reportSlowPizzaToFactoryUrl: j.reportUrl, jwt: j.jwt });
     } else {
+      Metrics.incrementPizzaCreationFailures()
       res.status(500).send({ message: 'Failed to fulfill order at factory', reportPizzaCreationErrorToPizzaFactoryUrl: j.reportUrl });
     }
   })

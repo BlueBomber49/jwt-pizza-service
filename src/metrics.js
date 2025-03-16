@@ -37,18 +37,10 @@ class Metrics {
 
   sendMetricsPeriodically(period) {
     setInterval(() => {
-      this.getCpu()
-      sendMetricToGrafana("cpu", this.cpuValue, "gauge", "%");
-  
-      this.getMemory()
-      sendMetricToGrafana("memory", this.memoryValue, "gauge", "%");
-
+      this.sendOsMetricsToGrafana()
       this.sendHTTPMetricsToGrafana()
-
       this.sendAuthMetricsToGrafana()
-
-      sendMetricToGrafana("active users", this.activeUsers, "gauge", "1")
-  
+      this.sendPizzaMetricsToGrafana()
     }, period).unref();
   }
 
@@ -68,6 +60,22 @@ class Metrics {
     this.successfulAuthAttempts = 0
     sendMetricToGrafana("unsuccessful logins", this.failedAuthAttempts, "sum", "1")
     this.failedAuthAttempts = 0
+    sendMetricToGrafana("active users", this.activeUsers, "gauge", "1")
+  }
+
+  sendPizzaMetricsToGrafana(){
+    sendMetricToGrafana("pizzas sold", this.pizzasSold, "sum", "1")
+    this.pizzasSold = 0
+    sendMetricToGrafana("revenue", this.revenueEarned, "sum", "1")
+    this.revenueEarned = 0
+    sendMetricToGrafana("pizza creation failures", this.pizzaCreationFailures, "sum", "1")
+  }
+
+  sendOsMetricsToGrafana(){
+    this.getCpu()
+    sendMetricToGrafana("cpu", this.cpuValue, "gauge", "%");
+    this.getMemory()
+    sendMetricToGrafana("memory", this.memoryValue, "gauge", "%");
   }
 
   incrementGetRequests(){
@@ -96,6 +104,10 @@ class Metrics {
 
   incrementActiveUsers(){
     this.activeUsers +=1
+  }
+
+  incrementPizzaCreationFailures(){
+    this.pizzaCreationFailures += 1
   }
 
   decrementActiveUsers(){
