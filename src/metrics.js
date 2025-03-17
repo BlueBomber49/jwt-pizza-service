@@ -32,7 +32,9 @@ class Metrics {
     this.pizzaCreationFailures = 0
     this.revenueEarned = 0
     this.endpointLatency = 0  //?
+    this.endpointTimes = []
     this.pizzaCreationLatency = 0  //?
+    this.pizzaTimes = []
   }
 
   sendMetricsPeriodically(period) {
@@ -41,34 +43,34 @@ class Metrics {
       this.sendHTTPMetricsToGrafana()
       this.sendAuthMetricsToGrafana()
       this.sendPizzaMetricsToGrafana()
+      this.sendLatencyMetricsToGrafana()
     }, period).unref();
   }
 
   sendHTTPMetricsToGrafana(){
     sendMetricToGrafana("get requests", this.getRequests, "sum", "1")
-    this.getRequests = 0
     sendMetricToGrafana("put requests", this.putRequests, "sum", "1")
-    this.putRequests = 0
     sendMetricToGrafana("post requests", this.postRequests, "sum", "1")
-    this.postRequests = 0
     sendMetricToGrafana("delete requests", this.deleteRequests, "sum", "1")
-    this.deleteRequests = 0
   }
 
   sendAuthMetricsToGrafana(){
     sendMetricToGrafana("successful logins", this.successfulAuthAttempts, "sum", "1")
-    this.successfulAuthAttempts = 0
     sendMetricToGrafana("unsuccessful logins", this.failedAuthAttempts, "sum", "1")
-    this.failedAuthAttempts = 0
     sendMetricToGrafana("active users", this.activeUsers, "gauge", "1")
   }
 
   sendPizzaMetricsToGrafana(){
     sendMetricToGrafana("pizzas sold", this.pizzasSold, "sum", "1")
-    this.pizzasSold = 0
     sendMetricToGrafana("revenue", this.revenueEarned, "sum", "1")
-    this.revenueEarned = 0
     sendMetricToGrafana("pizza creation failures", this.pizzaCreationFailures, "sum", "1")
+  }
+
+  sendLatencyMetricsToGrafana(){
+    sendMetricToGrafana("pizza creation latency", this.pizzaCreationLatency, "sum", "ms")
+    this.pizzaTimes = []
+    sendMetricToGrafana("endpoint latency", this.endpointLatency, "sum", "ms")
+    this.endpointTimes = []
   }
 
   sendOsMetricsToGrafana(){
@@ -127,7 +129,34 @@ class Metrics {
   }
 
   addRevenue(value){
-    this.trackRevenue += value
+    this.trackRevenue += value * 100
+  }
+
+  timePizzaLatency = (req, res, next) => {
+    const startTime = performance.now()
+    let pizzaCreationTime
+    res.on("finish", () => {
+      const endTime = performance.now()
+      pizzaCreationTime = endTime - startTime
+      this.pizzaTimes.push(pizzaCreationTime)
+      this.pizzaCreationLatency = this.pizzaTimes.reduce((total, current) => total + current, 0) / this.pizzaTimes.length
+      this.pizzaCreationLatency = parseInt(this.pizzaCreationLatency)
+    })
+    next()
+  }
+
+  timeEndpointLatency = (req, res, next) => {
+    const startTime = performance.now()
+    let endpointTime
+    res.on("finish", () => {
+      const endTime = performance.now()
+      endpointTime = endTime - startTime
+      this.endpointTimes.push(endpointTime)
+      this.endpointLatency = this.endpointTimes
+      .reduce((total, current) => total + current, 0) / this.endpointTimes.length
+      this.endpointLatency = parseInt(this.endpointLatency)
+    })
+    next()
   }
 }
 

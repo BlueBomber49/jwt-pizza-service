@@ -80,6 +80,7 @@ orderRouter.get(
 orderRouter.post(
   '/',
   authRouter.authenticateToken,
+  Metrics.timePizzaLatency,
   asyncHandler(async (req, res) => {
     Metrics.incrementPostRequests()
     const orderReq = req.body;
@@ -92,7 +93,9 @@ orderRouter.post(
     const j = await r.json();
     if (r.ok) {
       Metrics.incrementPizzasSold()
-      Metrics.addRevenue(r.price)
+      for(let i = 0; i < orderReq.items.length; i++){
+        Metrics.addRevenue(orderReq.items[i].price)
+      }
       res.send({ order, reportSlowPizzaToFactoryUrl: j.reportUrl, jwt: j.jwt });
     } else {
       Metrics.incrementPizzaCreationFailures()
