@@ -1,7 +1,5 @@
 const config = require("./config");
 
-let requests = {}
-
 const os = require("os");
 
 function getCpuUsagePercentage() {
