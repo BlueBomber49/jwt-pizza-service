@@ -29,9 +29,9 @@ class Metrics {
     this.pizzasSold = 0
     this.pizzaCreationFailures = 0
     this.revenueEarned = 0
-    this.endpointLatency = 0  //?
+    this.endpointLatency = 0
     this.endpointTimes = []
-    this.pizzaCreationLatency = 0  //?
+    this.pizzaCreationLatency = 0
     this.pizzaTimes = []
   }
 
@@ -127,7 +127,7 @@ class Metrics {
   }
 
   addRevenue(value){
-    this.trackRevenue += value * 100
+    this.revenueEarned += value * 1000
   }
 
   timePizzaLatency = (req, res, next) => {
@@ -196,6 +196,7 @@ function sendMetricToGrafana(metricName, metricValue, type, unit) {
   const body = JSON.stringify(metric);
 
   //Send the metrics to grafana
+  //console.log(body)
   fetch(`${config.metrics.url}`, {
     method: "POST",
     body: body,

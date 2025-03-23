@@ -5,11 +5,14 @@ const franchiseRouter = require('./routes/franchiseRouter.js');
 const version = require('./version.json');
 const config = require('./config.js');
 let Metrics = require('./metrics.js')
+let Logger = require('pizza-logger')
+const logger = new Logger(config)
 
 const app = express();
 app.use(express.json());
 app.use(setAuthUser);
 app.use(Metrics.timeEndpointLatency)
+app.use(logger.httpLogger)
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
