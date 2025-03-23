@@ -5,7 +5,6 @@ const { authRouter } = require('./authRouter.js');
 const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
 let Metrics = require('../metrics.js')
 const Logger = require('pizza-logger')
-const logger = new Logger(config)
 
 const orderRouter = express.Router();
 
@@ -84,6 +83,7 @@ orderRouter.post(
   authRouter.authenticateToken,
   Metrics.timePizzaLatency,
   asyncHandler(async (req, res) => {
+    const logger = new Logger(config)
     Metrics.incrementPostRequests()
     const orderReq = req.body;
     const order = await DB.addDinerOrder(req.user, orderReq);
